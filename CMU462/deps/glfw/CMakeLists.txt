@@ -2,9 +2,9 @@ set(CMAKE_LEGACY_CYGWIN_WIN32 OFF)
 
 project(GLFW C)
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 
-if (NOT CMAKE_VERSION VERSION_LESS "3.0")
+if (CMAKE_VERSION VERSION_LESS "3.0")
     # Until all major package systems have moved to CMake 3,
     # we stick with the older INSTALL_NAME_DIR mechanism
     cmake_policy(SET CMP0042 OLD)

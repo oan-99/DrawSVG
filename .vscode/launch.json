@@ -9,7 +9,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/RelWithDebInfo/DrawSVG.exe",
-            "args": [],
+            "args": ["../svg/subdiv"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/svg",
             "environment": [],
