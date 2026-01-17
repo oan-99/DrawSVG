@@ -4,12 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
             "name": "Release",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/RelWithDebInfo/DrawSVG.exe",
-            "args": ["../svg/subdiv"],
+            "args": ["../svg/basic"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/svg",
             "environment": [],

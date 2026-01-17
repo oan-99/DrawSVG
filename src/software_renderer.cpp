@@ -244,6 +244,74 @@ void SoftwareRendererImp::rasterize_line( float x0, float y0,
 
   // Task 2: 
   // Implement line rasterization
+
+
+  float dx = x1 - x0;
+  float dy = y1 - y0;
+  if(std::abs(dx) > std::abs(dy)) {
+    if(x0 > x1){
+      this->rasterize_line_x(x1, y1, x0, y0, color);
+    } else{
+      this->rasterize_line_x(x0, y0, x1, y1, color);
+    }
+  }
+  else{
+    if(y0 > y1){
+      this->rasterize_line_y(x1, y1, x0, y0, color);
+    } else{
+      this->rasterize_line_y(x0, y0, x1, y1, color);
+    }
+  }
+  
+
+  
+
+}
+
+void SoftwareRendererImp::rasterize_line_x( float x0, float y0,
+                                            float x1, float y1,
+                                            Color color){
+
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int eps = 0;
+    int y = floor(y0);
+
+    int dir = dy < 0 ? -1 : 1;
+    dy *= dir;
+
+    for(int x = floor(x0); x <= x1; x++){
+      this->rasterize_point(x, y, color);
+      eps += dy;
+      if((2 * eps) >= dx){
+        y += dir;
+        eps -= dx;
+    }
+  }
+                                          
+}
+
+void SoftwareRendererImp::rasterize_line_y( float x0, float y0,
+                                            float x1, float y1,
+                                            Color color){
+
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int eps = 0;
+    int x = floor(x0);
+
+    int dir = dx < 0 ? -1 : 1;
+    dx *= dir;
+
+    for(int y = floor(y0); y <= y1; y++){
+      this->rasterize_point(x, y, color);
+      eps += dx;
+      if((2 * eps) >= dy){
+        x += dir;
+        eps -= dy;
+    }
+  }
+                                          
 }
 
 void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
@@ -252,6 +320,45 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
                                               Color color ) {
   // Task 3: 
   // Implement triangle rasterization
+  
+  float lx, rx, ty, by;
+  lx = rx = x0;
+  ty = by = y0; // rectangle around triangle
+  
+
+  // find the left most x-ordinate
+  if(lx > x1) lx = x1;
+  if(lx > x2) lx = x2;
+
+  // find the right most x-ordinate
+  if(rx < x1) rx = x1;
+  if(rx < x2) rx = x2;
+
+  // find the bottom most y-ordinate
+  if(by > y1) by = y1;
+  if(by > y2) by = y2;
+
+  // find the top most y-ordinate
+  if(ty < y1) ty = y1;
+  if(ty < y2) ty = y2;
+
+  // iterate over the rectangle enclosing the triangle
+  for(int y = floor(by); y <= ty; y++){
+    for(int x = floor(lx); x <= rx; x++){
+      int p1 = ((x1 - x0) * (y - y0)) - ((y1 - y0) * (x - x0));
+      int p2 = ((x2 - x1) * (y - y1)) - ((y2 - y1) * (x - x1));
+      int p3 = ((x0 - x2) * (y - y2)) - ((y0 - y2) * (x - x2));
+
+      if((p1 <= 0 && p2 <= 0 && p3 <=   0) || (p1 >= 0 && p2 >= 0 && p3 >= 0)){
+        this->rasterize_point(x, y, color);
+      }
+      else{
+        //this->rasterize_point(x,y, Color(0, 256, 256, 1));
+      }
+      
+    }
+  }
+  
 
 }
 

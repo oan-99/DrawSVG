@@ -118,6 +118,14 @@ class SoftwareRendererImp : public SoftwareRenderer {
   void rasterize_line( float x0, float y0,
                        float x1, float y1,
                        Color color);
+  
+  void rasterize_line_x( float x0, float y0,
+                       float x1, float y1,
+                       Color color);
+
+  void rasterize_line_y( float x0, float y0,
+                       float x1, float y1,
+                       Color color);
 
   // rasterize a triangle
   void rasterize_triangle( float x0, float y0,
