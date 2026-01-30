@@ -78,6 +78,12 @@ class SoftwareRendererImp : public SoftwareRenderer {
   void set_render_target( unsigned char* target_buffer,
                           size_t width, size_t height );
 
+  // super-sampling buffer
+  std::vector<unsigned char> ss_buffer;
+
+  // width & height of the super-sampling buffer
+  size_t ss_buffer_w, ss_buffer_h;
+
  private:
 
   // Primitive Drawing //
@@ -112,7 +118,7 @@ class SoftwareRendererImp : public SoftwareRenderer {
   // Rasterization //
 
   // rasterize a point
-  void rasterize_point( float x, float y, Color color );
+  void rasterize_point( float x, float y, Color color, bool sampling = false );
 
   // rasterize a line
   void rasterize_line( float x0, float y0,
