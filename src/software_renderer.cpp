@@ -438,22 +438,24 @@ void SoftwareRendererImp::rasterize_triangle( float x0, float y0,
   if(ty < y2) ty = y2;
 
   // iterate over the rectangle enclosing the triangle
-  for(int y = floor(by); y <= ty; y++){
-    for(int x = floor(lx); x <= rx; x++){
-      int px = x;
-      int py = y;
+  for(int y = floor(by); y <= ty; y += this->sample_rate){
+    for(int x = floor(lx); x <= rx; x += this->sample_rate){
+      //float px = x;
+      //float py = y;
       for(int sy = 0; sy < this->sample_rate; sy++){
         for(int sx = 0; sx < this->sample_rate; sx++){
           //this->rasterize_point(x + sx, y + sy, color, true);
-          px += sx / this->sample_rate;
-          py += sy / this->sample_rate;
+          //px += 1.0f * sx / this->sample_rate;
+          //py += 1.0f * sy / this->sample_rate; 
+          int px = x + sx ;
+          int py = y + sy ;
           int p1 = ((x1 - x0) * (py - y0)) - ((y1 - y0) * (px - x0));
           int p2 = ((x2 - x1) * (py - y1)) - ((y2 - y1) * (px - x1));
           int p3 = ((x0 - x2) * (py - y2)) - ((y0 - y2) * (px - x2));
 
 
           if((p1 <= 0 && p2 <= 0 && p3 <=   0) || (p1 >= 0 && p2 >= 0 && p3 >= 0)){
-            this->rasterize_point(x, y, color, true);
+            this->rasterize_point(px, py, color, true);
           }
           else{
             //this->rasterize_point(x,y, Color(0, 256, 256, 1));
