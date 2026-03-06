@@ -437,6 +437,7 @@ void DrawSVG::redraw() {
   clear();
 
   // set svg_2_screen transformation
+  
   Matrix3x3 m_imp = norm_to_screen * viewport_imp[current_tab]->get_svg_2_norm();
   Matrix3x3 m_ref = norm_to_screen * viewport_ref[current_tab]->get_svg_2_norm();
   software_renderer_imp->set_svg_2_screen( m_imp ); 

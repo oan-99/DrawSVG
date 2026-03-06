@@ -70,9 +70,13 @@ void SoftwareRendererImp::set_render_target( unsigned char* render_target,
 
 void SoftwareRendererImp::draw_element( SVGElement* element ) {
 
-  // Task 5 (part 1):
-  // Modify this to implement the transformation stack
-
+  
+  // Save current transform
+  Matrix3x3 old_transformation = transformation;
+  
+  // Accumulate this element's transform
+  transformation = transformation * element->transform;
+  
   switch(element->type) {
     case POINT:
       draw_point(static_cast<Point&>(*element));
@@ -101,7 +105,8 @@ void SoftwareRendererImp::draw_element( SVGElement* element ) {
     default:
       break;
   }
-
+ // Restore transform
+  transformation = old_transformation;
 }
 
 
@@ -390,7 +395,7 @@ void SoftwareRendererImp::rasterize_line_y( float x0, float y0,
       //this->rasterize_point(x, y, color, true);
       for(int sy = 0; sy < this->sample_rate; sy++){
         for(int sx = 0; sx < this->sample_rate; sx++){
-          this->rasterize_point(x + sx, y + sy , color, true);
+          this->rasterize_point(x + sx, y + sy, color, true);
         }
       }
       eps += dx;
@@ -488,6 +493,7 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
                                            Texture& tex ) {
   // Task 6: 
   // Implement image rasterization
+  //std::cout << "Image point x0,y0 & x1, y1: " << x0 << " " << y0 << " & " << x1 << " " << y1 << std::endl;
 
 }
 
