@@ -219,6 +219,9 @@ void SoftwareRendererImp::draw_image( Image& image ) {
   Vector2D p1 = transform(image.position + image.dimension);
  
   rasterize_image( p0.x, p0.y, p1.x, p1.y, image.tex );
+  std::cout << " Waiting ss_buffer: " << std::endl;
+  // for(auto val : ss_buffer)
+  //   std::cout << "ss_buffer: " << (int) val << " " << val << std::endl;
 }
 
 void SoftwareRendererImp::draw_group( Group& group ) {
@@ -493,7 +496,46 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
                                            Texture& tex ) {
   // Task 6: 
   // Implement image rasterization
-  //std::cout << "Image point x0,y0 & x1, y1: " << x0 << " " << y0 << " & " << x1 << " " << y1 << std::endl;
+  
+  for(int y = 0; y < tex.height; y++){
+    for(int x = 0; x < tex.width; x++){
+      
+      float scale_x = ((x1 - x0) / (1.0f * tex.width)); // scale factor alongside x
+      float scale_y = ((y1 - y0) / (1.0f * tex.height)); // scale factor alongside y
+      
+      float xt = (x + 0.5) * scale_x ; // scaling image alongside x
+      float yt = (y + 0.5) * scale_y ; // scalingt image alongside y
+      xt += x0 ; // translating image along x
+      yt += y0 ; // translating image along y
+
+      float xt1 = (x + 1 + 0.5) * scale_x; // scaling image alongside x + 1
+      float yt1 = (y + 1 + 0.5) * scale_y; // scaling image alongside y + 1
+      xt1 += x0 ; // translating image along x + 1
+      yt1 += y0 ; // translating image along y + 1
+      
+            
+      for(int interpy = 0; interpy < floor(yt1) - floor(yt); interpy++){ // interpolation along y
+        for(int interpx = 0; interpx < floor(xt1) - floor(xt); interpx++){ // interpolation along x
+           
+          for(int sy = 0; sy < this->sample_rate; sy++ ) {
+              
+              float syt = (sy + 0.5) / (1.0f * this->sample_rate);
+              
+              for(int sx = 0; sx < this->sample_rate; sx++) {
+                
+                float sxt = (sx + 0.5) / (1.0f * this->sample_rate);
+                
+                this->rasterize_point(  (xt + interpx), 
+                                        (yt + interpy),
+                                        sampler->sample_nearest(tex, x + sxt, y + syt, 0)
+                                      );
+            }
+          }
+        }
+      }
+    }
+  }
+
 
 }
 

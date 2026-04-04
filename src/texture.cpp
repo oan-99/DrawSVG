@@ -1,4 +1,4 @@
-#include "texture.h"
+ #include "texture.h"
 #include "color.h"
 
 #include <assert.h>
@@ -80,12 +80,23 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
 
 Color Sampler2DImp::sample_nearest(Texture& tex, 
                                    float u, float v, 
-                                   int level) {
+                                    int level) {
 
   // Task 6: Implement nearest neighbour interpolation
+
+  int x = floor(u);
+  int y = floor(v);
+  //std::cout << "u, v & x, y: " << u << " " << v << " " << x << " " << y << std::endl; 
+
   
-  // return magenta for invalid level
-  return Color(1,0,1,1);
+
+  //return Color(1,0,1,1);
+  float r = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 0] / 255.0f; 
+  float g = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 1] / 255.0f; 
+  float b = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 2] / 255.0f;  
+  float a = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 3] / 255.0f;
+                                
+  return Color(r, g, b, a);
 
 }
 
