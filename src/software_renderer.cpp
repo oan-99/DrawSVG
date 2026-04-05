@@ -497,25 +497,36 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
   // Task 6: 
   // Implement image rasterization
   
+
   for(int y = 0; y < tex.height; y++){
     for(int x = 0; x < tex.width; x++){
       
+      
+
       float scale_x = ((x1 - x0) / (1.0f * tex.width)); // scale factor alongside x
       float scale_y = ((y1 - y0) / (1.0f * tex.height)); // scale factor alongside y
       
-      float xt = (x + 0.5) * scale_x ; // scaling image alongside x
-      float yt = (y + 0.5) * scale_y ; // scalingt image alongside y
-      xt += x0 ; // translating image along x
-      yt += y0 ; // translating image along y
+      float xt = (x) * scale_x ; // scaling image alongside x
+      float yt = (y) * scale_y ; // scalingt image alongside y
+      xt += x0; // translating image along x
+      yt += y0; // translating image along y
 
-      float xt1 = (x + 1 + 0.5) * scale_x; // scaling image alongside x + 1
-      float yt1 = (y + 1 + 0.5) * scale_y; // scaling image alongside y + 1
-      xt1 += x0 ; // translating image along x + 1
-      yt1 += y0 ; // translating image along y + 1
+      float xt1 = (x + 1) * scale_x; // scaling image alongside x + 1
+      float yt1 = (y + 1) * scale_y; // scaling image alongside y + 1
+      xt1 += x0 + 0.5; // translating image along x + 1
+      yt1 += y0 + 0.5; // translating image along y + 1
       
-            
-      for(int interpy = 0; interpy < floor(yt1) - floor(yt); interpy++){ // interpolation along y
-        for(int interpx = 0; interpx < floor(xt1) - floor(xt); interpx++){ // interpolation along x
+      //floor(yt1) - floor(yt)
+      //floor(xt1) - floor(xt)
+
+      // float diff_y_interp = yt1 - yt;
+      // float diff_x_interp = xt1 - xt;
+
+      int diff_y_interp = floor(yt1) - floor(yt);
+      int diff_x_interp = floor(xt1) - floor(xt);
+
+      for(int interpy = 0; interpy < diff_y_interp; interpy++){ // interpolation along y
+        for(int interpx = 0; interpx < diff_x_interp; interpx++){ // interpolation along x
            
           for(int sy = 0; sy < this->sample_rate; sy++ ) {
               
@@ -527,7 +538,7 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
                 
                 this->rasterize_point(  (xt + interpx), 
                                         (yt + interpy),
-                                        sampler->sample_nearest(tex, x + sxt, y + syt, 0)
+                                        sampler->sample_bilinear(tex, x + sxt, y + syt, 0)
                                       );
             }
           }
