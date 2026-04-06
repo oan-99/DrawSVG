@@ -496,58 +496,40 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
                                            Texture& tex ) {
   // Task 6: 
   // Implement image rasterization
+
+  // image/texture transformation
+  float scale_x = ((x1 - x0) / (1.0f * tex.width)); // scale factor alongside x
+  float scale_y = ((y1 - y0) / (1.0f * tex.height)); // scale factor alongside y
+  float trans_x = x0; // translation along x axis
+  float trans_y = y0; // translation along y axis 
   
+  // iterating over the canvas/object to which image/texture is applied
+  for(int y = floor(y0); y < floor(y1); y++){
+    for(int x = floor(x0); x < floor(x1); x++){
 
-  for(int y = 0; y < tex.height; y++){
-    for(int x = 0; x < tex.width; x++){
-      
-      
+      // super sampling
+      for(int sy = 0; sy < this->sample_rate; sy++ ){
+        for(int sx = 0; sx < this->sample_rate; sx++ ){
+          
+          // calculate the super sampled points
+          float ssx = x + (sx + 0.5f) / this->sample_rate;
+          float ssy = y + (sy + 0.5f) / this->sample_rate;  
 
-      float scale_x = ((x1 - x0) / (1.0f * tex.width)); // scale factor alongside x
-      float scale_y = ((y1 - y0) / (1.0f * tex.height)); // scale factor alongside y
-      
-      float xt = (x) * scale_x ; // scaling image alongside x
-      float yt = (y) * scale_y ; // scalingt image alongside y
-      xt += x0; // translating image along x
-      yt += y0; // translating image along y
+          // corresponding points for the texture/image
+          float u = (ssx - trans_x) / scale_x; // inverse image/texture tranformation at x-axis
+          float v = (ssy - trans_y) / scale_y; // inverse image/texture tranformation at y-axis
 
-      float xt1 = (x + 1) * scale_x; // scaling image alongside x + 1
-      float yt1 = (y + 1) * scale_y; // scaling image alongside y + 1
-      xt1 += x0 + 0.5; // translating image along x + 1
-      yt1 += y0 + 0.5; // translating image along y + 1
-      
-      //floor(yt1) - floor(yt)
-      //floor(xt1) - floor(xt)
+          // rasterize the ponits using point sampler
+          this->rasterize_point(
+                                  x + sx, 
+                                  y + sy, 
+                                  sampler->sample_bilinear(tex, u, v, 0)
+                                );
 
-      // float diff_y_interp = yt1 - yt;
-      // float diff_x_interp = xt1 - xt;
-
-      int diff_y_interp = floor(yt1) - floor(yt);
-      int diff_x_interp = floor(xt1) - floor(xt);
-
-      for(int interpy = 0; interpy < diff_y_interp; interpy++){ // interpolation along y
-        for(int interpx = 0; interpx < diff_x_interp; interpx++){ // interpolation along x
-           
-          for(int sy = 0; sy < this->sample_rate; sy++ ) {
-              
-              float syt = (sy + 0.5) / (1.0f * this->sample_rate);
-              
-              for(int sx = 0; sx < this->sample_rate; sx++) {
-                
-                float sxt = (sx + 0.5) / (1.0f * this->sample_rate);
-                
-                this->rasterize_point(  (xt + interpx), 
-                                        (yt + interpy),
-                                        sampler->sample_bilinear(tex, x + sxt, y + syt, 0)
-                                      );
-            }
-          }
         }
       }
     }
   }
-
-
 }
 
 // resolve samples to render target

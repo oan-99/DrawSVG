@@ -84,9 +84,11 @@ Color Sampler2DImp::sample_nearest(Texture& tex,
 
   // Task 6: Implement nearest neighbour interpolation
 
-  int x = floor(u);
+  // pixel coordinates
+  int x = floor(u); 
   int y = floor(v);
   
+  // fetching colors
   float r = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 0] / 255.0f; 
   float g = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 1] / 255.0f; 
   float b = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 2] / 255.0f;  
@@ -101,40 +103,34 @@ Color Sampler2DImp::sample_bilinear(Texture& tex,
                                     int level) {
   
   // Task 6: Implement bilinear filtering
+
+  // pixel coordinates
   int x0 = floor(u);
   int y0 = floor(v);
-  int x1 = ceil(u) < tex.width ? ceil(u) : floor(u);
-  int y1 = ceil(v) < tex.height ? ceil(v) : floor(v);
 
-  Color colors[4];
-  float s = u - (x0 + 0.5);
-  float t = v - (y0 + 0.5); 
+  Color colors[4]; // 4 pixels to be fetched
+  
+  // distance b/w pixel and point
+  float s = u - (x0); 
+  float t = v - (y0); 
 
-  //std::cout << "texel size: " << tex.mipmap[level].texels.size() << std::endl;
-  //std::cout << "Random texel: " << int(tex.mipmap[level].texels[272150]) << std::endl;
-
+  // iterating over the 4 pixels to be fetched from texture
   for(int y = 0; y < 2 && (y0 + y) < tex.height; y++){
-
     for(int x = 0; x < 2  && (x0 + x) < tex.width; x++){
-      // std::cout << "x0 + x, y0, + y: " << x0 + x << ", " << y0 + y << std::endl;
-      // float r = tex.mipmap[level].texels[((x0 + x) * 4 * tex.width) + ((y0 + y) * 4) + 0] / 255.0f; 
-      // float g = tex.mipmap[level].texels[((x0 + x) * 4 * tex.width) + ((y0 + y) * 4) + 1] / 255.0f; 
-      // float b = tex.mipmap[level].texels[((x0 + x) * 4 * tex.width) + ((y0 + y) * 4) + 2] / 255.0f;  
-      // float a = tex.mipmap[level].texels[((x0 + x) * 4 * tex.width) + ((y0 + y) * 4) + 3] / 255.0f;
-
+      
+      // fetching colors
       float r = tex.mipmap[level].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.width) + 0] / 255.0f; 
       float g = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 1] / 255.0f; 
       float b = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 2] / 255.0f;  
       float a = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 3] / 255.0f;
 
-
-
+      // storing em'
       colors[x + (2 * y)] = Color(r, g, b, a);
 
     }
   }
   
-  
+  // applying bilinear interpolation
   Color interp_color =  ( 
                           (
                             (1 - t) * 
@@ -152,7 +148,6 @@ Color Sampler2DImp::sample_bilinear(Texture& tex,
                           )
                         );
 
-  interp_color.a = 1.0f;
   return interp_color;
 
 }
