@@ -62,19 +62,43 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
     level.height = height;
     level.texels = vector<unsigned char>(4 * width * height);
 
-  }
+    std::cout << "Level: " << i << " " << level.width << " " << level.height << " " << level.texels.size() << std::endl;
+
+    for(int y = 0; y < level.height; y++){
+      for(int x = 0; x < level.width; x++){
+       
+        // int trans_y = y * (tex.mipmap[0].height - level.height);
+        // int trans_x = x * (tex.mipmap[0].width - level.width);
+
+        int trans_y = y * (tex.mipmap[0].height / level.height);
+        int trans_x = x * (tex.mipmap[0].width / level.width);
+
+        int col_ind = (x * 4) + (y * 4 * level.width); 
+        int trans_col_ind = (trans_x * 4) + (trans_y * 4  * tex.mipmap[0].width);
+
+        std::cout << "x, y: " << x << ", " <<  y << " | trans_x, trans_y: "  << trans_x << ", " << trans_y << " | col_ind, trans_col_ind: "  << col_ind << ", " << trans_col_ind << std::endl;
+    
+        level.texels[col_ind + 0] = tex.mipmap[0].texels[trans_col_ind + 0];
+        level.texels[col_ind + 1] = tex.mipmap[0].texels[trans_col_ind + 1];
+        level.texels[col_ind + 2] = tex.mipmap[0].texels[trans_col_ind + 2];
+        level.texels[col_ind + 3] = tex.mipmap[0].texels[trans_col_ind + 3];
+    
+      }
+    }
+ 
+  } 
 
   // fill all 0 sub levels with interchanging colors (JUST AS A PLACEHOLDER)
-  Color colors[3] = { Color(1,0,0,1), Color(0,1,0,1), Color(0,0,1,1) };
-  for(size_t i = 1; i < tex.mipmap.size(); ++i) {
+  // Color colors[3] = { Color(1,0,0,1), Color(0,1,0,1), Color(0,0,1,1) };
+  // for(size_t i = 1; i < tex.mipmap.size(); ++i) {
 
-    Color c = colors[i % 3];
-    MipLevel& mip = tex.mipmap[i];
+  //   Color c = colors[i % 3];
+  //   MipLevel& mip = tex.mipmap[i];
 
-    for(size_t i = 0; i < 4 * mip.width * mip.height; i += 4) {
-      float_to_uint8( &mip.texels[i], &c.r );
-    }
-  }
+  //   for(size_t i = 0; i < 4 * mip.width * mip.height; i += 4) {
+  //     float_to_uint8( &mip.texels[i], &c.r );
+  //   }
+  // }
 
 }
 
@@ -89,10 +113,10 @@ Color Sampler2DImp::sample_nearest(Texture& tex,
   int y = floor(v);
   
   // fetching colors
-  float r = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 0] / 255.0f; 
-  float g = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 1] / 255.0f; 
-  float b = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 2] / 255.0f;  
-  float a = tex.mipmap[level].texels[(x * 4 * tex.width) + (y * 4) + 3] / 255.0f;
+  float r = tex.mipmap[level].texels[(x * 4 * tex.mipmap[level].width) + (y * 4) + 0] / 255.0f; 
+  float g = tex.mipmap[level].texels[(x * 4 * tex.mipmap[level].width) + (y * 4) + 1] / 255.0f; 
+  float b = tex.mipmap[level].texels[(x * 4 * tex.mipmap[level].width) + (y * 4) + 2] / 255.0f;  
+  float a = tex.mipmap[level].texels[(x * 4 * tex.mipmap[level].width) + (y * 4) + 3] / 255.0f;
                                 
   return Color(r, g, b, a);
 
@@ -115,14 +139,14 @@ Color Sampler2DImp::sample_bilinear(Texture& tex,
   float t = v - (y0); 
 
   // iterating over the 4 pixels to be fetched from texture
-  for(int y = 0; y < 2 && (y0 + y) < tex.height; y++){
-    for(int x = 0; x < 2  && (x0 + x) < tex.width; x++){
+  for(int y = 0; y < 2 && (y0 + y) < tex.mipmap[level].height; y++){
+    for(int x = 0; x < 2  && (x0 + x) < tex.mipmap[level].width; x++){
       
       // fetching colors
-      float r = tex.mipmap[level].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.width) + 0] / 255.0f; 
-      float g = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 1] / 255.0f; 
-      float b = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 2] / 255.0f;  
-      float a = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 3] / 255.0f;
+      float r = tex.mipmap[level].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.mipmap[level].width) + 0] / 255.0f; 
+      float g = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.mipmap[level].width) + 1] / 255.0f; 
+      float b = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.mipmap[level].width) + 2] / 255.0f;  
+      float a = tex.mipmap[level].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.mipmap[level].width) + 3] / 255.0f;
 
       // storing em'
       colors[x + (2 * y)] = Color(r, g, b, a);
@@ -157,7 +181,52 @@ Color Sampler2DImp::sample_trilinear(Texture& tex,
                                      float u_scale, float v_scale) {
 
   // Task 7: Implement trilinear filtering
-  return Color(1, 0, 1, 1);
+  
+  // pixel coordinates
+  int x0 = floor(u);
+  int y0 = floor(v);
+
+  Color colors[4]; // 4 pixels to be fetched
+  
+  // distance b/w pixel and point
+  float s = u - (x0); 
+  float t = v - (y0); 
+
+  // iterating over the 4 pixels to be fetched from texture
+  for(int y = 0; y < 2 && (y0 + y) < tex.height; y++){
+    for(int x = 0; x < 2  && (x0 + x) < tex.width; x++){
+      
+      // fetching colors
+      float r = tex.mipmap[0].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.width) + 0] / 255.0f; 
+      float g = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 1] / 255.0f; 
+      float b = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 2] / 255.0f;  
+      float a = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 3] / 255.0f;
+
+      // storing em'
+      colors[x + (2 * y)] = Color(r, g, b, a);
+
+    }
+  }
+  
+  // applying bilinear interpolation
+  Color interp_color =  ( 
+                          (
+                            (1 - t) * 
+                            ( 
+                              ((1-s) * colors[0]) + 
+                              (s * colors[1])
+                            )
+                          ) +
+                          (
+                            t *
+                            (
+                              ((1-s) * colors[2]) +
+                              (s * colors[3])
+                            )
+                          )
+                        );
+
+  return interp_color;
 
 }
 

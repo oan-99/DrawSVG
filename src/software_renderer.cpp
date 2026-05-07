@@ -497,9 +497,11 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
   // Task 6: 
   // Implement image rasterization
 
+  int level = 0; // tells the level of the mipmap to use
+
   // image/texture transformation
-  float scale_x = ((x1 - x0) / (1.0f * tex.width)); // scale factor alongside x
-  float scale_y = ((y1 - y0) / (1.0f * tex.height)); // scale factor alongside y
+  float scale_x = ((x1 - x0) / (1.0f * tex.mipmap[level].width)); // scale factor alongside x
+  float scale_y = ((y1 - y0) / (1.0f * tex.mipmap[level].height)); // scale factor alongside y
   float trans_x = x0; // translation along x axis
   float trans_y = y0; // translation along y axis 
   
@@ -523,7 +525,8 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
           this->rasterize_point(
                                   x + sx, 
                                   y + sy, 
-                                  sampler->sample_bilinear(tex, u, v, 0)
+                                  sampler->sample_bilinear(tex, u, v, level)
+                                  //sampler->sample_nearest(tex, u, v, level)
                                 );
 
         }
