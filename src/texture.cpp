@@ -76,7 +76,7 @@ void Sampler2DImp::generate_mips(Texture& tex, int startLevel) {
         int col_ind = (x * 4) + (y * 4 * level.width); 
         int trans_col_ind = (trans_x * 4) + (trans_y * 4  * tex.mipmap[0].width);
 
-        std::cout << "x, y: " << x << ", " <<  y << " | trans_x, trans_y: "  << trans_x << ", " << trans_y << " | col_ind, trans_col_ind: "  << col_ind << ", " << trans_col_ind << std::endl;
+        //std::cout << "x, y: " << x << ", " <<  y << " | trans_x, trans_y: "  << trans_x << ", " << trans_y << " | col_ind, trans_col_ind: "  << col_ind << ", " << trans_col_ind << std::endl;
     
         level.texels[col_ind + 0] = tex.mipmap[0].texels[trans_col_ind + 0];
         level.texels[col_ind + 1] = tex.mipmap[0].texels[trans_col_ind + 1];
@@ -181,50 +181,74 @@ Color Sampler2DImp::sample_trilinear(Texture& tex,
                                      float u_scale, float v_scale) {
 
   // Task 7: Implement trilinear filtering
-  
-  // pixel coordinates
-  int x0 = floor(u);
-  int y0 = floor(v);
 
-  Color colors[4]; // 4 pixels to be fetched
-  
-  // distance b/w pixel and point
-  float s = u - (x0); 
-  float t = v - (y0); 
+  //std::cout << "Value of u_scale, v_scale: " << u_scale << ", " << v_scale << std::endl; 
 
-  // iterating over the 4 pixels to be fetched from texture
-  for(int y = 0; y < 2 && (y0 + y) < tex.height; y++){
-    for(int x = 0; x < 2  && (x0 + x) < tex.width; x++){
-      
-      // fetching colors
-      float r = tex.mipmap[0].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.width) + 0] / 255.0f; 
-      float g = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 1] / 255.0f; 
-      float b = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 2] / 255.0f;  
-      float a = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 3] / 255.0f;
+  float dudx = u_scale - u;
+  float dvdx = 0;
 
-      // storing em'
-      colors[x + (2 * y)] = Color(r, g, b, a);
+  float dudy = 0;
+  float dvdy = v_scale - v;
 
-    }
-  }
-  
-  // applying bilinear interpolation
+  float d = max(dudx * dudx, dvdy * dvdy);
+  d = log2f(sqrtf(d));
+
+  int ld = floorf(d);
+  int hd = ld < tex.mipmap.size() ? ld + 1 : ld;
+  //std::cout << "Levels chosen for ld, hd: " << ld << ", " << hd << std::endl;
+
+  Color col_l = sample_bilinear(tex, u, v, ld);
+  Color col_h = sample_bilinear(tex, u, v, hd);
+
+  float w = d - floorf(d);
+  // applying linear interpolation
   Color interp_color =  ( 
-                          (
-                            (1 - t) * 
-                            ( 
-                              ((1-s) * colors[0]) + 
-                              (s * colors[1])
-                            )
-                          ) +
-                          (
-                            t *
-                            (
-                              ((1-s) * colors[2]) +
-                              (s * colors[3])
-                            )
-                          )
+                          ((1-w) * col_l) + (w * col_h)
                         );
+
+  // // pixel coordinates
+  // int x0 = floor(u);
+  // int y0 = floor(v);
+
+  // Color colors[4]; // 4 pixels to be fetched
+  
+  // // distance b/w pixel and point
+  // float s = u - (x0); 
+  // float t = v - (y0); 
+
+  // // iterating over the 4 pixels to be fetched from texture
+  // for(int y = 0; y < 2 && (y0 + y) < tex.height; y++){
+  //   for(int x = 0; x < 2  && (x0 + x) < tex.width; x++){
+      
+  //     // fetching colors
+  //     float r = tex.mipmap[0].texels[((x0 + x) * 4 ) + ((y0 + y) * 4 * tex.width) + 0] / 255.0f; 
+  //     float g = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 1] / 255.0f; 
+  //     float b = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 2] / 255.0f;  
+  //     float a = tex.mipmap[0].texels[((x0 + x) * 4) + ((y0 + y) * 4 * tex.width) + 3] / 255.0f;
+
+  //     // storing em'
+  //     colors[x + (2 * y)] = Color(r, g, b, a);
+
+  //   }
+  // }
+  
+  // // applying bilinear interpolation
+  // Color interp_color =  ( 
+  //                         (
+  //                           (1 - t) * 
+  //                           ( 
+  //                             ((1-s) * colors[0]) + 
+  //                             (s * colors[1])
+  //                           )
+  //                         ) +
+  //                         (
+  //                           t *
+  //                           (
+  //                             ((1-s) * colors[2]) +
+  //                             (s * colors[3])
+  //                           )
+  //                         )
+  //                       );
 
   return interp_color;
 

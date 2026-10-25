@@ -516,19 +516,48 @@ void SoftwareRendererImp::rasterize_image( float x0, float y0,
           // calculate the super sampled points
           float ssx = x + (sx + 0.5f) / this->sample_rate;
           float ssy = y + (sy + 0.5f) / this->sample_rate;  
-
+          
           // corresponding points for the texture/image
-          float u = (ssx - trans_x) / scale_x; // inverse image/texture tranformation at x-axis
+          float u = (ssx - trans_x) / scale_x; // inverse image/texture tranformation at x-axis 
           float v = (ssy - trans_y) / scale_y; // inverse image/texture tranformation at y-axis
 
+          
           // rasterize the ponits using point sampler
+          
+          // bilinear sampling
+          // this->rasterize_point(
+          //                         x + sx, 
+          //                         y + sy, 
+          //                         sampler->sample_bilinear(tex, u, v, level)
+          //                       );
+
+          // nearest neighbourhood sampling
+          // this->rasterize_point(
+          //                         x + sx, 
+          //                         y + sy, 
+          //                         sampler->sample_nearest(tex, u, v, level)
+          //                       );
+
+          
+          // trilinear sampling          
+          // calculate the next super sampled points (for trillinear sampling)
+          float ssx_n = ssx + (1.0f / this->sample_rate); 
+          float ssy_n = ssy + (1.0f / this->sample_rate); 
+          ssx_n = ssx_n < x1 ? ssx_n : x1;
+          ssy_n = ssy_n < y1 ? ssy_n : y1;
+
+          // std::cout << "Normal points: ssx, ssy -> " << ssx << ", " << ssy << std::endl;
+          // std::cout << "Trilinear points: ssx_n, ssy_n -> " << ssx_n << ", " << ssy_n << std::endl;
+
+          // corresponding points for the (next points) texture/image (for trillinear sampling)
+          float u_n = (ssx_n - trans_x) / scale_x; // inverse image/texture tranformation at x-axis
+          float v_n = (ssy_n - trans_y) / scale_y; // inverse image/texture tranformation at y-axis
+
           this->rasterize_point(
                                   x + sx, 
                                   y + sy, 
-                                  sampler->sample_bilinear(tex, u, v, level)
-                                  //sampler->sample_nearest(tex, u, v, level)
+                                  sampler->sample_trilinear(tex, u, v, u_n, v_n)
                                 );
-
         }
       }
     }
